@@ -25,6 +25,7 @@ const parentSchema = new Schema({
   },
   schoolId: {
     type: Schema.Types.ObjectId,
+    ref: "School",
     required: [true, "school id should be provided"],
   },
   mobile: {
@@ -33,6 +34,7 @@ const parentSchema = new Schema({
   },
   students: {
     type: [Schema.Types.ObjectId],
+    ref: "Student",
     required: [true, "student ids are not provided"],
     validate: {
       validator: (arr) => arr.length > 0,

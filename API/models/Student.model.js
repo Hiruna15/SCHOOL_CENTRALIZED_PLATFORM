@@ -45,6 +45,7 @@ const studentSchema = new Schema({
   },
   schoolId: {
     type: Schema.Types.ObjectId,
+    ref: "School",
     required: [true, "school id should be provided"],
   },
   hash: {

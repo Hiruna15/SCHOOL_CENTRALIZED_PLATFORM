@@ -28,6 +28,7 @@ const schoolAdminSchema = new Schema({
   },
   schoolId: {
     type: Schema.Types.ObjectId,
+    ref: "School",
     required: [true, "an admin should be assigned to a school"],
   },
   userType: {
