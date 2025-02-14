@@ -1,3 +1,3 @@
 import mongoose from "mongoose";
 
-const customerRole = (req, res, next) => {};
+const authorize = (roles) => (req, res, next) => {};

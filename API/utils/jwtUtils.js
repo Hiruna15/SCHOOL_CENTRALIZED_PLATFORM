@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
 import fs from "fs";
 
-const issueJwt = (userId, username) => {
+const issueJwt = (userId, username, userType) => {
   const payload = {
     id: userId,
     username,
+    userType,
   };
 
   const REFRESH_TOKEN_PRIV_KEY = fs.readFileSync("refreshToken_privateKey.pem");
