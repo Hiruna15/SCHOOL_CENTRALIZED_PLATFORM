@@ -25,10 +25,16 @@ const homeWorkSchema = new Schema(
       required: [true, "Class must be specified"],
       trim: true,
     },
+    comments: { type: String, default: "" },
     isOnlineSubmission: {
       type: Boolean,
       default: false,
     },
+    isScheduled: {
+      type: Boolean,
+      default: false,
+    },
+    scheduledDateTime: { type: Date },
     dueDateTime: {
       type: Date,
       required: [true, "Due date and time are required"],
@@ -37,3 +43,7 @@ const homeWorkSchema = new Schema(
   },
   { timestamps: true }
 );
+
+const HomeworkModel = model("Homework", homeWorkSchema);
+
+export default HomeworkModel;

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { applyPasswordValidatingAndHashing } from "../utils/hashUtils.js";
-
 const { Schema, model } = mongoose;
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
