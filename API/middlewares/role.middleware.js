@@ -1,3 +1,12 @@
-import mongoose from "mongoose";
+import HttpStatus from "../constants/httpStatus";
 
-const authorize = (roles) => (req, res, next) => {};
+const authorize = (roles) => (req, res, next) => {
+  if (!roles.includes(req.user.userType)) {
+    return res
+      .status(HttpStatus.FORBIDDEN)
+      .json({ success: false, message: "Access denied" });
+  }
+  next();
+};
+
+export default authorize;
