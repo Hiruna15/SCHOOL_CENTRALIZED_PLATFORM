@@ -9,9 +9,9 @@ const submissionSchema = new Schema(
       ref: "Student",
       required: true,
     },
-    homework: {
+    assignment: {
       type: Schema.Types.ObjectId,
-      ref: "Homework",
+      ref: "Assignment",
       required: true,
     },
     feedback: {

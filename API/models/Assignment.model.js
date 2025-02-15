@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
-const homeWorkSchema = new Schema(
+const assignmentSchema = new Schema(
   {
     title: {
       type: String,
@@ -44,6 +44,6 @@ const homeWorkSchema = new Schema(
   { timestamps: true }
 );
 
-const HomeworkModel = model("Homework", homeWorkSchema);
+const AssignmentModel = model("Assignment", assignmentSchema);
 
-export default HomeworkModel;
+export default AssignmentModel;
