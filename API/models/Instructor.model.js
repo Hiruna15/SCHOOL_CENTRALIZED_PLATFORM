@@ -100,9 +100,7 @@ instructorSchema.pre("save", async function (next) {
   if (missingClasses.length > 0) {
     return next(
       new Error(
-        `Instructor should have assigned to at least one subject from each class that he is going to assign. Missing classes: ${missingClasses.join(
-          ", "
-        )}`
+        `Instructor should have assigned to at least one subject from each class that he has assigned.`
       )
     );
   }
