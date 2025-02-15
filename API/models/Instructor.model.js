@@ -37,8 +37,12 @@ const instructorSchema = new Schema({
     required: [true, "school id should be provided"],
   },
   classes: {
-    type: [String],
-    required: [true, "Classes must be provided"],
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Class",
+      },
+    ],
     validate: {
       validator: (arr) => arr.length > 0,
       message: "At least one class must be provided",
