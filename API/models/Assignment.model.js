@@ -14,16 +14,20 @@ const assignmentSchema = new Schema(
       required: [true, "Description is required"],
       trim: true,
     },
-    //   subject
     instructor: {
       type: Schema.Types.ObjectId,
       ref: "Instructor",
       required: true,
     },
     class: {
-      type: String,
-      required: [true, "Class must be specified"],
-      trim: true,
+      type: Schema.Types.ObjectId,
+      ref: "Class",
+      required: true,
+    },
+    subject: {
+      type: Schema.Types.ObjectId,
+      ref: "Subject",
+      required: true,
     },
     comments: { type: String, default: "" },
     isOnlineSubmission: {
