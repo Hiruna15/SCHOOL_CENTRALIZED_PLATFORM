@@ -5,6 +5,7 @@ const { Schema, model } = mongoose;
 const subjectSchema = new Schema({
   name: {
     type: "String",
+    unique: true,
     required: [true, "Subject name is required"],
     trim: true,
     lowercase: true,
@@ -22,7 +23,6 @@ const subjectSchema = new Schema({
       message: "At least one class must be provided",
     },
   },
-  //grades
 });
 
 subjectSchema.pre("save", async function (next) {

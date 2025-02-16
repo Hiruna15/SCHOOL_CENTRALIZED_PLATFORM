@@ -12,16 +12,18 @@ const classSchema = new Schema({
     type: String,
     required: [true, "Grade level is required"],
   },
-  // subjects: {
-  //   type: [String],
-  //   default: [],
-  //   validate: {
-  //     validator: function (v) {
-  //       return Array.isArray(v) && v.length >= 4;
-  //     },
-  //     message: "There should be at least 4 subjects assigned to a class",
-  //   },
-  // },
+  subjects: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Subject",
+      },
+    ],
+    validate: {
+      validator: (arr) => arr.length > 0,
+      message: "At least one subject must be added",
+    },
+  },
   students: {
     type: [
       {
