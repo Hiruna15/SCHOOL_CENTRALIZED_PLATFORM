@@ -36,25 +36,18 @@ const instructorSchema = new Schema({
     ref: "School",
     required: [true, "school id should be provided"],
   },
-  classes: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Class",
-      },
-    ],
+  classesSubjectsMap: {
+    type: Map,
+    of: [{ type: Schema.Types.ObjectId, ref: "Subject" }],
     validate: {
-      validator: (arr) => arr.length > 0,
-      message: "At least one class must be provided",
-    },
-  },
-  subjects: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Subject",
+      validator: function (map) {
+        return Array.from(map.values()).every(
+          (subjects) => subjects.length > 0
+        );
       },
-    ],
+      message:
+        "Instructor should have assess to at least one subject from each class that he is assigned to",
+    },
   },
   mobile: {
     type: [String],
@@ -70,42 +63,6 @@ const instructorSchema = new Schema({
     type: String,
     default: "instructor",
   },
-});
-
-instructorSchema.pre("save", async function (next) {
-  if (!this.isModified("subjects") && !this.isModified("classes")) {
-    return next();
-  }
-
-  const SubjectModel = mongoose.model("Subject");
-
-  const subjects = await SubjectModel.find({ _id: { $in: this.subjects } });
-
-  if (!subjects.length) {
-    return next(new Error("At least one subject must be assigned"));
-  }
-
-  const subjectClasses = new Set();
-  subjects.forEach((subject) => {
-    subject.classes.forEach((classId) =>
-      subjectClasses.add(classId.toString())
-    );
-  });
-
-  // Ensure every assigned class is covered by at least one subject
-  const missingClasses = this.classes.filter(
-    (classId) => !subjectClasses.has(classId.toString())
-  );
-
-  if (missingClasses.length > 0) {
-    return next(
-      new Error(
-        `Instructor should have assigned to at least one subject from each class that he has assigned.`
-      )
-    );
-  }
-
-  next();
 });
 
 applyPasswordValidatingAndHashing(instructorSchema);
