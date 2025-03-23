@@ -34,11 +34,20 @@ const submissionSchema = new Schema(
     marks: {
       type: Number,
       min: [0, "Marks cannot be less than 0"],
-      max: [
-        this.assignment.allowedMarks,
-        "Marks cannot be more than allowed marks",
-      ],
+      validate: {
+        validator: async function (value) {
+          if (!this.assignment) return true;
+          const Assignment = this.model("Assignment");
+          const assignment = await Assignment.findById(this.assignment);
+          return value <= assignment.allowedMarks;
+        },
+        message: "Marks cannot be more than allowed marks for this assignment",
+      },
       default: 0,
+    },
+    isLateSubmission: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
