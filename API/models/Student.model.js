@@ -28,7 +28,8 @@ const studentSchema = new Schema({
     required: [true, "Student should be assigned a grade"],
   },
   class: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "Class",
     required: [true, "Student should be assigned to a class"],
   },
   entryNumber: {

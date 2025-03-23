@@ -44,9 +44,20 @@ const assignmentSchema = new Schema(
       required: [true, "Due date and time are required"],
     },
     attachments: { type: [String], default: [] },
+    submitFileTypes: { type: [String], default: [] },
+    allowedMarks: { type: Number, default: 100 },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
+
+assignmentSchema.pre("save", function () {
+  if (this.isScheduled && !this.scheduledDateTime) {
+    throw new Error("Scheduled date and time are required");
+  }
+
+  next();
+});
 
 const AssignmentModel = model("Assignment", assignmentSchema);
 
