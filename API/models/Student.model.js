@@ -23,10 +23,6 @@ const studentSchema = new Schema({
     ],
     match: [emailRegex, "Invalid email address"],
   },
-  grade: {
-    type: String,
-    required: [true, "Student should be assigned a grade"],
-  },
   class: {
     type: Schema.Types.ObjectId,
     ref: "Class",

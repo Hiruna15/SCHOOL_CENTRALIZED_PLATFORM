@@ -1,10 +1,15 @@
 import express from "express";
-import AssignmentModel from "../models/Assignment.model.js";
+import { filterAssignments } from "../controllers/student.controller.js";
+import authenticateUser from "../middlewares/auth.middleware.js";
+import authorize from "../middlewares/role.middleware.js";
 
 const router = express.Router();
 
-router.get("/assignments", async (req, res, next) => {
-  const assignments = await AssignmentModel.find({});
-});
+router.get(
+  "/assignments/filter",
+  authenticateUser,
+  authorize(["student"]),
+  filterAssignments
+);
 
 export default router;
