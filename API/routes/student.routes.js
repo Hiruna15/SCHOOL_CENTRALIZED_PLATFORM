@@ -22,4 +22,11 @@ router.post(
   submitAssignment
 );
 
+router.get(
+  "/submissions",
+  authenticateUser,
+  authorize(["student"]),
+  getSubmissions
+);
+
 export default router;

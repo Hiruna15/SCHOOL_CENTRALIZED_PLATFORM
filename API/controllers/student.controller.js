@@ -18,7 +18,8 @@ const filterAssignments = async (req, res, next) => {
   }
 
   if (subjectIds) {
-    const subjects = Array.isArray(subjectIds) ? subjectIds : [subjectIds];
+    // Handle comma-separated subject IDs
+    const subjects = subjectIds.split(",").map((id) => id.trim());
     filterObject.subject = { $in: subjects };
   }
 
@@ -100,4 +101,47 @@ const submitAssignment = async (req, res, next) => {
   }
 };
 
-export { filterAssignments, submitAssignment };
+const getSubmissions = async (req, res, next) => {
+  try {
+    const student = req.user._id;
+    const { statuses } = req.query;
+
+    const filterObject = {
+      student,
+    };
+
+    if (statuses) {
+      const validStatuses = ["reviewed", "re-submit", "not-reviewed"];
+      const requestedStatuses = statuses
+        .split(",")
+        .map((status) => status.trim());
+
+      const invalidStatuses = requestedStatuses.filter(
+        (status) => !validStatuses.includes(status)
+      );
+
+      if (invalidStatuses.length > 0) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: `Invalid status values: ${invalidStatuses.join(
+            ", "
+          )}. Valid statuses are: ${validStatuses.join(", ")}`,
+        });
+      }
+
+      filterObject.status = {
+        $in: requestedStatuses,
+      };
+    }
+
+    const submissions = await SubmissionModel.find(filterObject);
+
+    res.status(HttpStatus.OK).json({
+      message: "Submissions fetched successfully",
+      submissions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { filterAssignments, submitAssignment, getSubmissions };
