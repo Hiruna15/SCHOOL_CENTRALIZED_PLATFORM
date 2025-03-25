@@ -1,4 +1,4 @@
-import HttpStatus from "../constants/httpStatus";
+import HttpStatus from "../constants/httpStatus.js";
 
 const authorize = (roles) => (req, res, next) => {
   if (!roles.includes(req.user.userType)) {

@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import fs from "fs";
-import InstructorModel from "../models/Instructor.model";
-import StudentModel from "../models/Student.model";
-import ParentModel from "../models/Parent.model";
-import SystemAdminModel from "../models/SystemAdmin.model";
-import SchoolAdminModel from "../models/SchoolAdmin.model";
+import InstructorModel from "../models/Instructor.model.js";
+import StudentModel from "../models/Student.model.js";
+import ParentModel from "../models/Parent.model.js";
+import SystemAdminModel from "../models/SystemAdmin.model.js";
+import SchoolAdminModel from "../models/SchoolAdmin.model.js";
 
 const userModels = {
   student: StudentModel,

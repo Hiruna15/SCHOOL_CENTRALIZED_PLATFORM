@@ -2,10 +2,11 @@ import express from "express";
 import {
   deleteSubmission,
   filterAssignments,
+  getSubmissions,
   submitAssignment,
   updateSubmission,
 } from "../controllers/student.controller.js";
-import authenticateUser from "../middlewares/auth.middleware.js";
+import { authenticateUser } from "../middlewares/auth.middleware.js";
 import authorize from "../middlewares/role.middleware.js";
 
 const router = express.Router();
