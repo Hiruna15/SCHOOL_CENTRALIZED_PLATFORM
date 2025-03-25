@@ -162,7 +162,7 @@ const updateSubmission = async (req, res, next) => {
     const existingSubmission = await SubmissionModel.findOne({
       _id: id,
       student: req.user._id,
-    });
+    }).populate("assignment");
 
     if (!existingSubmission) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -221,9 +221,60 @@ const updateSubmission = async (req, res, next) => {
   }
 };
 
+const deleteSubmission = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const existingSubmission = await SubmissionModel.findOne({
+      _id: id,
+      student: req.user._id,
+    }).populate("assignment");
+
+    if (!existingSubmission) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        message: "Submission not found",
+      });
+    }
+
+    if (
+      existingSubmission.assignment.isLocked ||
+      !existingSubmission.assignment.isActive
+    ) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: "Assignment is locked or not active",
+      });
+    }
+
+    if (["reviewed", "re-submit"].includes(existingSubmission.status)) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message:
+          "Cannot delete a submission that has been reviewed or re-submitted",
+      });
+    }
+
+    if (
+      !existingSubmission.assignment.isLateSubmissionAllowed &&
+      new Date() > existingSubmission.assignment.dueDateTime
+    ) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: "Cannot delete a submission that has met the deadline",
+      });
+    }
+
+    await SubmissionModel.findByIdAndDelete(id);
+
+    res.status(HttpStatus.OK).json({
+      message: "Submission deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   filterAssignments,
   submitAssignment,
   getSubmissions,
   updateSubmission,
+  deleteSubmission,
 };

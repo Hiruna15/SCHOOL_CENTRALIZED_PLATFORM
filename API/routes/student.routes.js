@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  deleteSubmission,
   filterAssignments,
   submitAssignment,
   updateSubmission,
@@ -35,6 +36,13 @@ router.patch(
   authenticateUser,
   authorize(["student"]),
   updateSubmission
+);
+
+router.delete(
+  "/submissions/:id",
+  authenticateUser,
+  authorize(["student"]),
+  deleteSubmission
 );
 
 export default router;
