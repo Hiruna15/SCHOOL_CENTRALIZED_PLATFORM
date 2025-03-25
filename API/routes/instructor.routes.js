@@ -1,5 +1,8 @@
 import express from "express";
-import { createAssignment } from "../controllers/instructor.controller.js";
+import {
+  createAssignment,
+  getAssignments,
+} from "../controllers/instructor.controller.js";
 import { authenticateUser } from "../middlewares/auth.middleware.js";
 import authorize from "../middlewares/role.middleware.js";
 
@@ -10,6 +13,13 @@ router.post(
   authenticateUser,
   authorize(["instructor"]),
   createAssignment
+);
+
+router.get(
+  "/assignments",
+  authenticateUser,
+  authorize(["instructor"]),
+  getAssignments
 );
 
 export default router;
