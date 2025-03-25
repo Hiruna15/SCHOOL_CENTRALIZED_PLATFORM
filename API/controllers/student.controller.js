@@ -18,7 +18,6 @@ const filterAssignments = async (req, res, next) => {
   }
 
   if (subjectIds) {
-    // Handle comma-separated subject IDs
     const subjects = subjectIds.split(",").map((id) => id.trim());
     filterObject.subject = { $in: subjects };
   }
@@ -50,7 +49,19 @@ const submitAssignment = async (req, res, next) => {
       });
     }
 
-    if (new Date() > assignmentDoc.dueDateTime) {
+    if (
+      !assignmentDoc.isLateSubmissionAllowed &&
+      new Date() > assignmentDoc.dueDateTime
+    ) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: "Late submission is not allowed",
+      });
+    }
+
+    if (
+      assignmentDoc.isLateSubmissionAllowed &&
+      new Date() > assignmentDoc.dueDateTime
+    ) {
       req.body.isLateSubmission = true;
     }
 
@@ -144,4 +155,75 @@ const getSubmissions = async (req, res, next) => {
   }
 };
 
-export { filterAssignments, submitAssignment, getSubmissions };
+const updateSubmission = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const existingSubmission = await SubmissionModel.findOne({
+      _id: id,
+      student: req.user._id,
+    });
+
+    if (!existingSubmission) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        message: "Submission not found",
+      });
+    }
+
+    if (!existingSubmission.assignment.isActive) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: "Assignment is not active",
+      });
+    }
+
+    if (existingSubmission.status !== "re-submit") {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: "Submission is not in re-submit status",
+      });
+    }
+
+    const { attachments } = req.body;
+
+    if (attachments && attachments.length > 0) {
+      const allowedTypes = existingSubmission.assignment.submitFileTypes;
+      const fileTypes = attachments.map((file) =>
+        file.split(".").pop().toLowerCase()
+      );
+      const invalidTypes = fileTypes.filter(
+        (type) => !allowedTypes.includes(type)
+      );
+      if (invalidTypes.length > 0) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: `Invalid file types. Allowed types: ${allowedTypes.join(
+            ", "
+          )}`,
+        });
+      }
+    }
+
+    const updatedSubmission = await SubmissionModel.findOneAndUpdate(
+      { _id: id, student: req.user._id },
+      {
+        status: "not-reviewed",
+        isResubmit: true,
+        attachments: req.body.attachments,
+        marks: 0,
+      },
+      { new: true, runValidators: true }
+    );
+
+    res.status(HttpStatus.OK).json({
+      message: "Submission updated successfully",
+      submission: updatedSubmission,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export {
+  filterAssignments,
+  submitAssignment,
+  getSubmissions,
+  updateSubmission,
+};
