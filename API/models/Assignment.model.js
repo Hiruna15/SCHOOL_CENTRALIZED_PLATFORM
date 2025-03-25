@@ -48,6 +48,7 @@ const assignmentSchema = new Schema(
     allowedMarks: { type: Number, default: 100 },
     isActive: { type: Boolean, default: true },
     isLateSubmissionAllowed: { type: Boolean, default: false },
+    isLocked: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
