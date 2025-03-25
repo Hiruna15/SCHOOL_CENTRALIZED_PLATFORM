@@ -27,6 +27,10 @@ const submissionSchema = new Schema(
       },
       default: "not-reviewed",
     },
+    isResubmit: {
+      type: Boolean,
+      default: false,
+    },
     attachments: {
       type: [String],
       default: [],

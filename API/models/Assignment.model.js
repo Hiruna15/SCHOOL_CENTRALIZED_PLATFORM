@@ -47,6 +47,7 @@ const assignmentSchema = new Schema(
     submitFileTypes: { type: [String], default: [] },
     allowedMarks: { type: Number, default: 100 },
     isActive: { type: Boolean, default: true },
+    isLateSubmissionAllowed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

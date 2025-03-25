@@ -2,6 +2,7 @@ import express from "express";
 import {
   filterAssignments,
   submitAssignment,
+  updateSubmission,
 } from "../controllers/student.controller.js";
 import authenticateUser from "../middlewares/auth.middleware.js";
 import authorize from "../middlewares/role.middleware.js";
@@ -27,6 +28,13 @@ router.get(
   authenticateUser,
   authorize(["student"]),
   getSubmissions
+);
+
+router.patch(
+  "/submissions/:id",
+  authenticateUser,
+  authorize(["student"]),
+  updateSubmission
 );
 
 export default router;
