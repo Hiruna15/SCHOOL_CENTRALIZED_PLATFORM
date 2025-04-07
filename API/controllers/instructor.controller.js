@@ -1,5 +1,6 @@
 import HttpStatus from "../constants/httpStatus.js";
 import AssignmentModel from "../models/Assignment.model.js";
+import ClassModel from "../models/Class.model.js";
 import InstructorModel from "../models/Instructor.model.js";
 
 const createAssignment = async (req, res, next) => {
@@ -143,4 +144,65 @@ const getAssignments = async (req, res, next) => {
   }
 };
 
-export { createAssignment, getAssignments };
+const getAssignment = async (req, res, next) => {
+  const { id: assignmentId } = req.params;
+
+  try {
+    const assignment = await AssignmentModel.findById(assignmentId);
+
+    if (!assignment) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        message: "assignment not found",
+      });
+    }
+
+    const instructorDoc = await InstructorModel.findOne({
+      _id: req.user._id,
+      [`classesSubjectsMap.${assignment.class}`]: { $exists: true },
+    });
+
+    if (!instructorDoc) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        message: "You don't have permission to view assignments for this class",
+      });
+    }
+
+    const instructorSubjects = instructorDoc.classesSubjectsMap.get(
+      assignment.class
+    );
+    const hasPermission = instructorSubjects.includes(assignment.subject);
+
+    if (!hasPermission) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        message:
+          "You don't have permission to view assignments for one or more of the requested subjects",
+      });
+    }
+
+    res.status(HttpStatus.OK).json({
+      message: "Assignments fetched successfully",
+      assignment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getClasses = async (req, res, next) => {
+  try {
+    const instructorId = req.user._id;
+
+    const classes = await ClassModel.find({
+      instructors: instructorId,
+    });
+
+    res.status(HttpStatus.OK).json({
+      message: "Classes fetched successfully",
+      classes,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { createAssignment, getAssignments, getAssignment, getClasses };
