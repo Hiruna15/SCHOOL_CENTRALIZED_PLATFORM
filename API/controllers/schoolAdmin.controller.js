@@ -118,4 +118,50 @@ const registerInstructor = async (req, res, next) => {
   }
 };
 
-export { registerStudent, registerInstructor };
+const updateStudentClass = async (req, res, next) => {
+  const { students, classId } = req.body;
+
+  try {
+    if (!students || !Array.isArray(students) || students.length === 0) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: "students are not provided" });
+    }
+
+    const classExist = await ClassModel.findOne({
+      _id: classId,
+      schoolId: req.user.schoolId,
+    });
+
+    if (!classExist) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: "the class with that id doesn't exist in the school",
+      });
+    }
+
+    const studentsInSchool = await StudentModel.find({
+      _id: { $in: students },
+      schoolId: req.user.schoolId,
+    });
+
+    if (studentsInSchool.length !== students.length) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: "some students are not in this school" });
+    }
+
+    const updateResult = await StudentModel.updateMany(
+      { _id: { $in: students } },
+      { $set: { class: classId } }
+    );
+
+    res.status(HttpStatus.OK).json({
+      message: "Students' class updated successfully",
+      updatedCount: updateResult.modifiedCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { registerStudent, registerInstructor, updateStudentClass };
