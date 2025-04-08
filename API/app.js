@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import studentRoutes from "./routes/student.routes.js";
 import instructorRoutes from "./routes/instructor.routes.js";
+import schoolAdminRoutes from "./routes/schoolAdmin.routes.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(cookieParser());
 app.use("api/auth", authRoutes);
 app.use("api/students", studentRoutes);
 app.use("api/instructors", instructorRoutes);
+app.use("api/schoolAdmin", schoolAdminRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
