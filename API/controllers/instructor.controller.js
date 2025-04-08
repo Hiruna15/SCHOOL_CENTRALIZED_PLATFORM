@@ -2,6 +2,7 @@ import HttpStatus from "../constants/httpStatus.js";
 import AssignmentModel from "../models/Assignment.model.js";
 import ClassModel from "../models/Class.model.js";
 import InstructorModel from "../models/Instructor.model.js";
+import SubjectModel from "../models/Subject.model.js";
 
 const createAssignment = async (req, res, next) => {
   try {
@@ -205,4 +206,40 @@ const getClasses = async (req, res, next) => {
   }
 };
 
-export { createAssignment, getAssignments, getAssignment, getClasses };
+const getSubjects = async (req, res, next) => {
+  const { classId } = req.params;
+
+  try {
+    const instructorDoc = await InstructorModel.findOne({
+      _id: req.user._id,
+      [`classesSubjectsMap.${classId}`]: { $exists: true },
+    });
+
+    if (!instructorDoc) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        message: "You don't have permission to access subjects of this class",
+      });
+    }
+
+    const instructorSubjects = instructorDoc.classesSubjectsMap.get(classId);
+
+    const subjects = await SubjectModel.find({
+      _id: { $in: instructorSubjects },
+    });
+
+    res.status(HttpStatus.OK).json({
+      message: "Subjects fetched successfully",
+      subjects,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export {
+  createAssignment,
+  getAssignments,
+  getAssignment,
+  getClasses,
+  getSubjects,
+};
