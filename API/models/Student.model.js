@@ -23,11 +23,16 @@ const studentSchema = new Schema({
     ],
     match: [emailRegex, "Invalid email address"],
   },
-  class: {
+  enrolledClass: {
     type: Schema.Types.ObjectId,
     ref: "Class",
-    required: [true, "Student should be assigned to a class"],
+    default: null,
   },
+  // class: {
+  //   type: Schema.Types.ObjectId,
+  //   ref: "Class",
+  //   required: [true, "Student should be assigned to a class"],
+  // },
   entryNumber: {
     type: String,
     required: [true, "entry number of the student should be provided"],
