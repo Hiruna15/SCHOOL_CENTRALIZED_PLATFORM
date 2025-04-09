@@ -24,15 +24,15 @@ const classSchema = new Schema({
       message: "At least one subject must be added",
     },
   },
-  students: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Student",
-      },
-    ],
-    default: [],
-  },
+  // students: {
+  //   type: [
+  //     {
+  //       type: Schema.Types.ObjectId,
+  //       ref: "Student",
+  //     },
+  //   ],
+  //   default: [],
+  // },
   instructors: {
     type: [
       {
@@ -57,6 +57,10 @@ const classSchema = new Schema({
       },
     ],
     default: {},
+  },
+  enrollKey: {
+    type: String,
+    required: [true, "A class must have a enroll key"],
   },
 });
 
