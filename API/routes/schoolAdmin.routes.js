@@ -4,7 +4,7 @@ import authorize from "../middlewares/role.middleware.js";
 import {
   registerInstructor,
   registerStudent,
-  updateStudentClass,
+  unenrollStudents,
 } from "../controllers/schoolAdmin.controller.js";
 
 const router = express.Router();
@@ -27,10 +27,11 @@ router.patch(
   "/student/:id",
   authenticateUser,
   authorize(["schoolAdmin"]),
-  updateStudentClass
+  unenrollStudents
 );
 
 export default router;
 
+//get enrolled students
 // add classes
 // add subjects

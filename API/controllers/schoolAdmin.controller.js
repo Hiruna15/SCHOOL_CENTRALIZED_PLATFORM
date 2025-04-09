@@ -6,17 +6,18 @@ import StudentModel from "../models/Student.model.js";
 const registerStudent = async (req, res, next) => {
   try {
     const adminsSchool = req.user.schoolId;
+    const { email, username } = req.body;
 
-    const isCorrectClass = !!(await ClassModel.findOne({
-      _id: req.body.class,
-      schoolId: adminsSchool,
-    }));
+    // const isCorrectClass = !!(await ClassModel.findOne({
+    //   _id: req.body.class,
+    //   schoolId: adminsSchool,
+    // }));
 
-    if (!isCorrectClass) {
-      return res.status(HttpStatus.BAD_REQUEST).json({
-        message: "Invalid class ID or class does not belong to your school",
-      });
-    }
+    // if (!isCorrectClass) {
+    //   return res.status(HttpStatus.BAD_REQUEST).json({
+    //     message: "Invalid class ID or class does not belong to your school",
+    //   });
+    // }
 
     if (adminsSchool !== req.body.schoolId) {
       return res.status(HttpStatus.BAD_REQUEST).json({
@@ -25,7 +26,7 @@ const registerStudent = async (req, res, next) => {
     }
 
     const existingStudent = await StudentModel.findOne({
-      email: req.body.email,
+      $or: [{ username }, { email }],
     });
     if (existingStudent) {
       return res.status(HttpStatus.CONFLICT).json({
@@ -118,50 +119,131 @@ const registerInstructor = async (req, res, next) => {
   }
 };
 
-const updateStudentClass = async (req, res, next) => {
-  const { students, classId } = req.body;
+// const updateStudentClass = async (req, res, next) => {
+//   const { students, classId } = req.body;
 
-  try {
-    if (!students || !Array.isArray(students) || students.length === 0) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .json({ message: "students are not provided" });
-    }
+//   try {
+//     if (!students || !Array.isArray(students) || students.length === 0) {
+//       return res
+//         .status(HttpStatus.BAD_REQUEST)
+//         .json({ message: "students are not provided" });
+//     }
 
-    const classExist = await ClassModel.findOne({
-      _id: classId,
-      schoolId: req.user.schoolId,
-    });
+//     const classExist = await ClassModel.findOne({
+//       _id: classId,
+//       schoolId: req.user.schoolId,
+//     });
 
-    if (!classExist) {
+//     if (!classExist) {
+//       return res.status(HttpStatus.BAD_REQUEST).json({
+//         message: "the class with that id doesn't exist in the school",
+//       });
+//     }
+
+//     const studentsInSchool = await StudentModel.find({
+//       _id: { $in: students },
+//       schoolId: req.user.schoolId,
+//     });
+
+//     if (studentsInSchool.length !== students.length) {
+//       return res
+//         .status(HttpStatus.BAD_REQUEST)
+//         .json({ message: "some students are not in this school" });
+//     }
+
+//     const updateResult = await StudentModel.updateMany(
+//       { _id: { $in: students } },
+//       { $set: { class: classId } }
+//     );
+
+//     res.status(HttpStatus.OK).json({
+//       message: "Students' class updated successfully",
+//       updatedCount: updateResult.modifiedCount,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+const unenrollStudents = async (req, res, next) => {
+  const { classes, students } = req.body;
+
+  const handleUnenrollment = async (ids, isClass = false) => {
+    if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(HttpStatus.BAD_REQUEST).json({
-        message: "the class with that id doesn't exist in the school",
+        message: `${
+          isClass ? "classes" : "students"
+        } must be a non-empty array`,
       });
     }
 
-    const studentsInSchool = await StudentModel.find({
-      _id: { $in: students },
-      schoolId: req.user.schoolId,
-    });
+    if (isClass) {
+      const classesInSchool = await ClassModel.find({
+        _id: { $in: ids },
+        schoolId: req.user.schoolId,
+      });
 
-    if (studentsInSchool.length !== students.length) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .json({ message: "some students are not in this school" });
+      if (classesInSchool.length !== ids.length) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: "Some classes are not in this school",
+        });
+      }
+
+      const updateResult = await StudentModel.updateMany(
+        {
+          enrolledClass: { $in: ids },
+          schoolId: req.user.schoolId,
+        },
+        { $set: { enrolledClass: null } }
+      );
+
+      return res.status(HttpStatus.OK).json({
+        message: "Students unenrolled successfully",
+        updatedCount: updateResult.modifiedCount,
+      });
+    } else {
+      const studentsInSchool = await StudentModel.find({
+        _id: { $in: ids },
+        schoolId: req.user.schoolId,
+        enrolledClass: { $ne: null },
+      });
+
+      if (studentsInSchool.length !== ids.length) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message:
+            "Some students are not in this school or are already unenrolled",
+        });
+      }
+
+      const updateResult = await StudentModel.updateMany(
+        { _id: { $in: ids } },
+        { $set: { enrolledClass: null } }
+      );
+
+      return res.status(HttpStatus.OK).json({
+        message: "Students unenrolled successfully",
+        updatedCount: updateResult.modifiedCount,
+      });
+    }
+  };
+
+  try {
+    if (!classes && !students) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: "Either classes or students must be provided",
+      });
     }
 
-    const updateResult = await StudentModel.updateMany(
-      { _id: { $in: students } },
-      { $set: { class: classId } }
-    );
+    if (students) {
+      return await handleUnenrollment(students);
+    }
 
-    res.status(HttpStatus.OK).json({
-      message: "Students' class updated successfully",
-      updatedCount: updateResult.modifiedCount,
-    });
+    if (classes) {
+      return await handleUnenrollment(classes, true);
+    }
   } catch (error) {
     next(error);
   }
 };
 
-export { registerStudent, registerInstructor, updateStudentClass };
+export { registerStudent, registerInstructor, unenrollStudents };
